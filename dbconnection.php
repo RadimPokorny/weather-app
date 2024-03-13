@@ -2,14 +2,13 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$table = "weather";
+$database = "weather";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $table);
+$conn = new mysqli($servername, $username, $password, $database);
 
 // Check connection
 if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 }
-echo "Connected successfully";
 ?>

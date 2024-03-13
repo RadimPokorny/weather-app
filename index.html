@@ -19,19 +19,26 @@
             <button class="" onclick="showCity(this)">Pelhřimov</button>
         </div>
     </div>
-    <form method="get" action="insertowdata.php">
-
-        <input type="radio" id="html" name="fav_language" value="HTML">
-<label for="html">Havlíčkův Brod</label><br>
-<input type="radio" id="css" name="fav_language" value="CSS">
-<label for="css">Jihlava</label><br>
-<input type="radio" id="javascript" name="fav_language" value="JavaScript">
-<label for="javascript">Třebíč</label>
-<input type="radio" id="zdar" name="fav_language" value="Žďár nad Sázavou">
-<label for="zdar">Žďár nad Sázavou</label>
-<button type="submit">Submit</button>
-
-
+    <form id="weatherForm" method="post" action="showdata.php" onsubmit="showData(event)">
+        <input type="radio" id="havlickuv_brod" name="fav_language" value="Havlíčkův Brod">
+        <label for="havlickuv_brod">Havlíčkův Brod</label><br>
+    
+        <input type="radio" id="jihlava" name="fav_language" value="Jihlava">
+        <label for="jihlava">Jihlava</label><br>
+    
+        <input type="radio" id="trebic" name="fav_language" value="Třebíč">
+        <label for="trebic">Třebíč</label><br>
+    
+        <input type="radio" id="zdar" name="fav_language" value="Žďár nad Sázavou">
+        <label for="zdar">Žďár nad Sázavou</label><br>
+    
+        <label for="od">Od</label>
+        <input type="datetime-local" id="od" name="oddata" />
+    
+        <label for="do">Do</label>
+        <input type="datetime-local" id="do" name="dodata" />
+    
+        <button type="submit">Submit</button>
     </form>
 
     <div class="box2" id="weather-info">
@@ -49,7 +56,6 @@
             xhr.open("GET", "get_weather.php?city=" + city, true);
             xhr.send();
         }
-
 
         function showCity(mesto){
 
@@ -75,6 +81,25 @@
 });
 
         } 
+
+    function showData(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const form = document.getElementById('weatherForm');
+        const formData = new FormData(form);
+
+        const options = {
+            method: 'POST',
+            body: formData,
+        };
+
+        fetch('showdata.php', options)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('weather-info').innerHTML = data;
+            })
+            .catch(error => console.error('Error:', error));
+    }
 
     </script>
 
