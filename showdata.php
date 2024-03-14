@@ -16,14 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
     $result = $stmt->get_result();
 
+    $data = array(); // Initialize an array to hold the data
+
     if ($result->num_rows > 0) {
         // Output data of each row
         while ($row = $result->fetch_assoc()) {
-            echo "Date: " . $row["day"] . " - Max Temperature: " . $row["max_temperature"] . "<br>";
+            // Add each row of data to the array
+            $data[] = $row;
         }
     } else {
         echo "0 results";
     }
+
+    // Output the data array as JSON
+    echo json_encode($data);
 
     $stmt->close();
 } else {

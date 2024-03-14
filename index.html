@@ -1,107 +1,130 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    <div class="box">
-        <p class="">Vyber město</p>
-        <div class="buttons">
-            <button class="" onclick="showCity(this)">Třebíč</button>
-            <button class="" onclick="showCity(this)">Jihlava</button>
-            <button class="" onclick="showCity(this)">Žďár nad Sázavou</button>
-            <button class="" onclick="showCity(this)">Pelhřimov</button>
-        </div>
+<div class="box">
+    <p class="">Vyber město</p>
+    <div class="buttons">
+        <button class="" onclick="showCity(this)">Třebíč</button>
+        <button class="" onclick="showCity(this)">Jihlava</button>
+        <button class="" onclick="showCity(this)">Žďár nad Sázavou</button>
+        <button class="" onclick="showCity(this)">Pelhřimov</button>
     </div>
-    <form id="weatherForm" method="post" action="showdata.php" onsubmit="showData(event)">
-        <input type="radio" id="havlickuv_brod" name="fav_language" value="Havlíčkův Brod">
-        <label for="havlickuv_brod">Havlíčkův Brod</label><br>
-    
-        <input type="radio" id="jihlava" name="fav_language" value="Jihlava">
-        <label for="jihlava">Jihlava</label><br>
-    
-        <input type="radio" id="trebic" name="fav_language" value="Třebíč">
-        <label for="trebic">Třebíč</label><br>
-    
-        <input type="radio" id="zdar" name="fav_language" value="Žďár nad Sázavou">
-        <label for="zdar">Žďár nad Sázavou</label><br>
-    
-        <label for="od">Od</label>
-        <input type="datetime-local" id="od" name="oddata" />
-    
-        <label for="do">Do</label>
-        <input type="datetime-local" id="do" name="dodata" />
-    
-        <button type="submit">Submit</button>
-    </form>
+</div>
+<form id="weatherForm" method="post" action="showdata.php" onsubmit="showData(event)">
+    <input type="radio" id="havlickuv_brod" name="fav_language" value="Havlíčkův Brod">
+    <label for="havlickuv_brod">Havlíčkův Brod</label><br>
 
-    <div class="box2" id="weather-info">
-    </div>
+    <input type="radio" id="jihlava" name="fav_language" value="Jihlava">
+    <label for="jihlava">Jihlava</label><br>
 
-    <script>
-        function getWeather(city) {
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    document.getElementById("weather-info").innerHTML = xhr.responseText;
-                }
-            };
-            
-            xhr.open("GET", "get_weather.php?city=" + city, true);
-            xhr.send();
+    <input type="radio" id="trebic" name="fav_language" value="Třebíč">
+    <label for="trebic">Třebíč</label><br>
+
+    <input type="radio" id="zdar" name="fav_language" value="Žďár nad Sázavou">
+    <label for="zdar">Žďár nad Sázavou</label><br>
+
+    <label for="od">Od</label>
+    <input type="datetime-local" id="od" name="oddata" />
+
+    <label for="do">Do</label>
+    <input type="datetime-local" id="do" name="dodata" />
+
+    <button type="submit">Submit</button>
+</form>
+
+<div class="box2" id="weather-info">
+</div>
+
+<div id="curve_chart" style="width: 900px; height: 500px"></div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart(chartData) {
+    const data = new google.visualization.DataTable();
+    data.addColumn('date', 'Date');
+    data.addColumn('number', 'Max Temperature');
+
+    // Loop through each data point and add it to the DataTable
+    chartData.forEach(entry => {
+        const dateParts = entry.day.split('-');
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]) - 1; // Month is 0-based index
+        const day = parseInt(dateParts[2]);
+        const temperature = parseFloat(entry.max_temperature);
+        data.addRow([new Date(year, month, day), temperature]);
+    });
+
+    const options = {
+        title: 'Maximum Temperature by Date',
+        curveType: 'function',
+        legend: { position: 'bottom' },
+        hAxis: {
+            title: 'Date'
+        },
+        vAxis: {
+            title: 'Max Temperature'
         }
+    };
 
-        function showCity(mesto){
+    const chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+    chart.draw(data, options);
+}
 
-            const url = "get_weather.php";
-            let data = new URLSearchParams();
-            data.append('city', String(mesto.innerHTML));
-
-            const options = {
-                method: 'POST',
-                body: data
-            };
-            fetch(url, options)
-            .then((data) => {
-                if (data.error) {
-                    // Handle error case
-                    console.error(data.error);
-                } else {
-                    // Display weather information
-                    document.getElementById("weather-info").innerHTML = 'Temperature: ' + data.temperature + '°C';
-
-                    // Add other information as needed
-    }
-});
-
-        } 
-
-    function showData(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        const form = document.getElementById('weatherForm');
-        const formData = new FormData(form);
+    function showCity(mesto){
+        const url = "get_weather.php";
+        let data = new URLSearchParams();
+        data.append('city', String(mesto.innerHTML));
 
         const options = {
             method: 'POST',
-            body: formData,
+            body: data
         };
 
-        fetch('showdata.php', options)
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('weather-info').innerHTML = data;
-            })
-            .catch(error => console.error('Error:', error));
+        fetch(url, options)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+            } else {
+                document.getElementById("weather-info").innerHTML = 'Temperature: ' + data.temperature + '°C';
+                // Add other information as needed
+                drawChart(data.chartData);
+            }
+        });
     }
 
-    </script>
+    function showData(event) {
+    event.preventDefault(); // Prevent default form submission
 
-    </body>
+    const form = document.getElementById('weatherForm');
+    const formData = new FormData(form);
+
+    const options = {
+        method: 'POST',
+        body: formData,
+    };
+
+    fetch('showdata.php', options)
+        .then(response => response.json()) // Parse response as JSON
+        .then(data => {
+            document.getElementById('weather-info').innerHTML = ''; // Clear weather info
+            drawChart(data); // Pass JSON data to drawChart function
+        })
+        .catch(error => console.error('Error:', error));
+}
+</script>
+
+</body>
 </html>
