@@ -17,7 +17,7 @@ $urlContent = file_get_contents($url);
 $weatherArray = json_decode($urlContent, true);
 
 if ($weatherArray['cod'] == 200) {
-
+ 
     $sql = "INSERT INTO weather ( city_id, temp, pres, hum, insert_time) values(?,?, ?,?,?)";
 
     $teplota = intval($weatherArray['main']['temp'] - 273);

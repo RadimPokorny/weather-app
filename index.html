@@ -38,6 +38,15 @@
     <label for="do">Do</label>
     <input type="datetime-local" id="do" name="dodata" />
 
+    <input type="radio" id="jihlava" name="language" value="Jihlava">
+    <label for="jihlava">Minimální</label><br>
+
+    <input type="radio" id="trebic" name="language" value="Třebíč">
+    <label for="trebic">Průměrný</label><br>
+
+    <input type="radio" id="zdar" name="language" value="Žďár nad Sázavou">
+    <label for="zdar">Maximální</label><br>
+
     <button type="submit">Submit</button>
 </form>
 
@@ -45,10 +54,11 @@
 </div>
 
 <div id="curve_chart" style="width: 900px; height: 500px"></div>
+<div id="table_div"></div>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-    google.charts.load('current', {'packages':['corechart']});
+    google.charts.load('current', {'packages':['corechart', 'bar','table']});
     google.charts.setOnLoadCallback(drawChart);
 
     function drawChart(chartData) {
@@ -80,6 +90,23 @@
 
     const chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
     chart.draw(data, options);
+
+    // Draw table
+    const tableData = new google.visualization.DataTable();
+    tableData.addColumn('date', 'Date');
+    tableData.addColumn('number', 'Max Temperature');
+    chartData.forEach(entry => {
+        const dateParts = entry.day.split('-');
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]) - 1; // Month is 0-based index
+        const day = parseInt(dateParts[2]);
+        const temperature = parseFloat(entry.max_temperature);
+        tableData.addRow([new Date(year, month, day), temperature]);
+    });
+    const table = new google.visualization.Table(document.getElementById('table_div'));
+    table.draw(tableData, {showRowNumber: true});
+console.log(data);
+
 }
 
     function showCity(mesto){
@@ -99,14 +126,13 @@
                 console.error(data.error);
             } else {
                 document.getElementById("weather-info").innerHTML = 'Temperature: ' + data.temperature + '°C';
-                // Add other information as needed
                 drawChart(data.chartData);
             }
         });
     }
 
     function showData(event) {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault();
 
     const form = document.getElementById('weatherForm');
     const formData = new FormData(form);
@@ -117,12 +143,47 @@
     };
 
     fetch('showdata.php', options)
-        .then(response => response.json()) // Parse response as JSON
+        .then(response => response.json())
         .then(data => {
-            document.getElementById('weather-info').innerHTML = ''; // Clear weather info
-            drawChart(data); // Pass JSON data to drawChart function
+            document.getElementById('weather-info').innerHTML = '';
+            drawChart(data);
+            data.forEach(row => {
+            // Zde můžete provést operace s každým řádkem dat
+            drawTable(data);
+        });
         })
+        
         .catch(error => console.error('Error:', error));
+}
+
+function drawTable(data) {
+    // Vytvořte tabulku
+    const table = document.createElement('table');
+    
+    // Vytvořte záhlaví tabulky
+    const headerRow = table.insertRow();
+    const headers = Object.keys(data[0]);
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        const text = document.createTextNode(headerText);
+        th.appendChild(text);
+        headerRow.appendChild(th);
+    });
+    
+    // Naplňte tabulku daty
+    data.forEach(entry => {
+        const row = table.insertRow();
+        Object.values(entry).forEach(value => {
+            const cell = row.insertCell();
+            const text = document.createTextNode(value);
+            cell.appendChild(text);
+        });
+    });
+    
+    // Přidejte tabulku do určeného divu
+    const tableDiv = document.getElementById('table_div');
+    tableDiv.innerHTML = '';
+    tableDiv.appendChild(table);
 }
 </script>
 
